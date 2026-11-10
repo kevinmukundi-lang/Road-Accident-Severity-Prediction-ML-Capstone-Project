@@ -197,6 +197,8 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap');
     html, body, [class*="st-"] {{ font-family: 'Barlow', sans-serif; }}
+    span[data-testid="stIconMaterial"], [class*="material-symbols"] {{
+        font-family: 'Material Symbols Rounded', 'Material Symbols Outlined' !important; }}
     .stApp {{ background: #EDF1F6; }}
     .block-container {{ padding-top: 1rem; padding-bottom: 1rem; max-width: 1500px; }}
     h1, h2, h3, h4 {{ font-family: 'Barlow Condensed', sans-serif !important; color: {INK}; }}
@@ -211,14 +213,14 @@ st.markdown(
         background: repeating-linear-gradient(90deg, {AMBER} 0 30px, transparent 30px 50px); }}
     .topbar .t {{ color: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.8rem; }}
     .topbar .p {{ color: #D5E1F2; font-size: 1rem; font-weight: 500; }}
-    .kpi {{ background: #fff; border-radius: 12px; padding: 0 1rem; height: 105px; box-sizing: border-box;
+    .kpi {{ background: #fff; border-radius: 12px; padding: 0 .8rem; height: 100px; box-sizing: border-box;
             display: flex; flex-direction: column; justify-content: center; overflow: hidden;
             border-left: 6px solid var(--c); box-shadow: 0 1px 4px rgba(18,38,63,.12); }}
     .kpi .label, .kpi .sub {{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-    .kpi .label {{ color: #5B6B80; font-size: .85rem; font-weight: 600; }}
-    .kpi .value {{ color: var(--c); font-family: 'Barlow Condensed', sans-serif;
-                   font-size: 2.2rem; font-weight: 700; line-height: 1.1; }}
-    .kpi .sub {{ color: #5B6B80; font-size: .8rem; min-height: 1.1rem; }}
+    .kpi .label {{ color: #5B6B80; font-size: .8rem; font-weight: 600; }}
+    .kpi .value {{ color: var(--c); font-family: 'Barlow Condensed', sans-serif; white-space: nowrap;
+                   font-size: clamp(1.6rem, 2.1vw, 2.1rem); font-weight: 700; line-height: 1.1; }}
+    .kpi .sub {{ color: #5B6B80; font-size: .75rem; min-height: 1rem; }}
     .fl {{ color: #5B6B80; font-size: .85rem; font-weight: 600; margin: .6rem 0 .2rem; }}
     section[data-testid="stSidebar"] div[data-testid="stPopover"] button {{ background: #fff; }}
     .up {{ color: {RED}; font-weight: 600; }} .down {{ color: {GREEN}; font-weight: 600; }}
@@ -430,9 +432,9 @@ days = max((pd.Timestamp(end_date) - pd.Timestamp(start_date)).days + 1, 1)
 def delta(val, ref):
     d = val - ref
     if abs(d) < 0.05:
-        return '<span class="flat">–</span>'
+        return ""
     cls, arrow = ("up", "▲") if d > 0 else ("down", "▼")
-    return f'<span class="{cls}">{arrow} {abs(d):.1f} pts</span>'
+    return f'<span class="{cls}">{arrow}{abs(d):.1f}</span>'
 
 
 def share(x):
@@ -445,15 +447,15 @@ def kpi(col, label, value, sub, color, tip=""):
                  unsafe_allow_html=True)
 
 
-VS_ALL = "Arrow shows the change compared with the whole dataset."
-k = st.columns(6)
+VS_ALL = "The arrow shows the change in percentage points compared with the whole dataset."
+k = st.columns(6, gap="small")
 kpi(k[0], "Collisions", f"{m['n']:,}", f"{m['n'] / days:,.0f} a day", BLUE)
 kpi(k[1], "Casualties", f"{m['nc']:,}", f"{m['nc'] / m['n']:.1f} per collision", SLATE)
 kpi(k[2], "Killed", f"{m['killed']:,}", share(m["killed"]), RED)
 kpi(k[3], "Seriously injured", f"{m['serious']:,}", share(m["serious"]), AMBER)
-kpi(k[4], "Vulnerable road users", f"{m['vru_pct']:.0f}%", delta(m["vru_pct"], b["vru_pct"]), TEAL,
+kpi(k[4], "Vulnerable users", f"{m['vru_pct']:.0f}%", "of casualties " + delta(m["vru_pct"], b["vru_pct"]), TEAL,
     "Pedestrians, cyclists and motorcyclists as a share of casualties. " + VS_ALL)
-kpi(k[5], "Collisions in dark", f"{m['dark_pct']:.0f}%", delta(m["dark_pct"], b["dark_pct"]), INK,
+kpi(k[5], "Dark collisions", f"{m['dark_pct']:.0f}%", "of collisions " + delta(m["dark_pct"], b["dark_pct"]), INK,
     "Share of collisions in darkness. " + VS_ALL)
 st.write("")
 
